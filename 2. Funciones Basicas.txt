@@ -1,0 +1,67 @@
+##### Buenas practicas :
+Para guardar las medidas 
+
+Inicio 
+Introduccion datos
+
+Crar Tabla : 
+Medidas Dax 
+cargar 
+
+####
+Unidades tomadas de inventario = 
+SUM (FactDetalles[Quantity])
+####
+Minimo unidades tomadas de inventario 
+MIN(FactDetalles[Quantity])
+####
+Maximo unidades tomadas de inventario=
+MAX(FactDetalles[Quantity])
+####
+Promedio unidades tomadas de inventario=
+AVERAGE(FactDetalles[Quantity])
+####
+Cantidad de transacciones=
+COUNTROWS(FactTrasacciones)
+####
+Registros con descuento=
+COUNTA(FactDetalles[Discount]) ##cantidad registros de una columna sin considerar nulos
+####
+Registros sin descuentos=
+COUNTBLANK(FactDetalles[Discount] ## cantidad de registros vacios o nulos
+####
+Productos unicos vendidos=
+DISTINCTCOUNT(FactDetalles[Product ID])
+####
+Desviacion estandar=
+STDEV.P(FactDetalles[Quantity])
+####
+Mediana unidades tomadas de inventario=
+MEDIAN(FactDetalles[Quantity])
+####
+Percentil unidades tomadas de inventario=
+PERCENTILE.EXC(FactDetalles[Quantity],0.90)
+#### 
+Rango uniddades tomadas de inventario=
+[Maximo unidades tomadas de invetario]-[Minimo unidades tomadas de inventario]
+### 
+Promedio ajustado unidades tomadas de inventario=
+ROUND([Promedio unidades tomadas de inventario],1)
+### 
+Promedio unidades tomadas de inventario ajustado hacia abajo=
+TRUNC([Promedio unidades tomadas de inventario])
+### 
+Unidades promedio tomadas de inventario =
+DIVIDE(SUM (FactDetalles[Quantity]), COUNTROWS(FactDetalles),0)
+
+## 
+DIV Promedio unidades tomadas de inventario=
+
+VAR  numerador=[Uniddaes tomadas de inventario]
+VAR denomidor =COUNTROWS(FactDetalles)
+VAR operacion=DIVIDE(numerador,denomindor,0)
+RETURN operacion 
+
+
+
+

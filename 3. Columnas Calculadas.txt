@@ -1,0 +1,59 @@
+#### FUNCION RELATED #### 
+
+//Vinculación de tablas 
+Tabla : FactDetalles
+Herramienta de tablas : Nueva Columna ********
+
+muchos a uno 
+Cproducto entregado ?=RELATED(FactTransacciones[Returned])
+C Nombre de Vendedor= RELATED(DimVendedor[Retail Sales People])
+
+
+### COLUMNAS CALCULADAS #### 
+
+C Nombre de Vendedor= RELATED(DimVendedor[Retail Sales People])
+
+C Total facturado= (FactDetalles[Sales]*FactDetalles[Quantity])*(1-FactDetalles[Discount])
+
+C ganancia = (FactDetalles[Profit]*FactDetalles[Quantify])*(1-FactDetalles[Discount])
+
+C Monto de descuento= FactDetalles[Sales] * FactDetalles[Quantify]*FactDetalles[Discount]
+
+C Margen de ganacia=DIVIDE(FactDetalles[C ganancia],FactDetalles[C Total facturado],0)	
+
+
+### FUNCIONES  DE ITERACION -- FUNCIONES X ###### CON CONTEXTO DE FILA 
+//Nueva medida
+
+Total facturado =SUMX(FactDetalles,
+			FactDetalles[Sales]*FactDetalles[Quantify])
+
+
+CALCULOS fila a fila ... CONSIDERANDO  EL GRAN TOTAL OPERACION EN .... FLASHCARD
+Total descuento facturado =
+SUMX(FactDetalles,FactDetalles[Sales]*FactDetalles[Quantify]
+
+
+
+Promedio descuento facturado=
+AVERAGEX(FactDetalles,
+	FactDetalles[Sales]*FactDetalles[Quantify]*FactDetalles[Discount])
+
+
+Maximo Facturado =
+MAXX(FactDetalles,FactDetalles[Sales]*FactDetalles[Quantity])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

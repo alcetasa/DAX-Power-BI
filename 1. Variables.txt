@@ -1,0 +1,66 @@
+1- Medidas  SUMX
+2. Campo Calculado    :
+
+calculate
+
+Medida Total de ventas =
+ SUMX(FactDetalles,FactDetalles[Sales]* FactDetalles[Quantity])
+
+
+Medida Total de venta Home office =
+ CALCULATE(SUMX(FactDetalles,FactDetalles[Sales]* FactDetalles[Quantity]),
+		DimSegmeno[Segment]="Home Office")
+
+########################################################
+## Variables
+########################################################
+
+Medida variable =
+VAR numero1=10
+VAR numero2=20
+VAR operacion=numero1*numero2
+
+RETURN operacion 
+
+
+%Total ventas Home office=
+
+VAR homeoffice= CALCULATE(SUMX(FactDetalles,FactDetalles[Sales]* FactDetalles[Quantity]),
+		DimSegmeno[Segment]="Home Office")
+
+VAR totalventas= SUMX(FactDetalles,
+		 FactDetalles[Quantify]*FactDetalles[Sales])
+
+VAR  operacion=homeoffice/totalventas
+
+RETURN operacion
+
+
+
+---- total de ventas que no son home offic%Total ventas otros segmentos=
+
+VAR homeoffice= CALCULATE(
+		SUMX(FactDetalles,FactDetalles[Sales]* FactDetalles[Quantity]),
+		DimSegmeno[Segment]="Home Office")
+
+VAR totalventas= SUMX(FactDetalles,
+		 FactDetalles[Quantify]*FactDetalles[Sales])
+
+
+VAR  operacion=(totalventas- homeofice)
+
+RETURN operacion
+
+
+###Redaccion Simplificada
+
+r1 =
+SUM(FactDetalles[Quantify])
+
+r2=
+SUMX(FactDetalles,FactDetalles[Quantity]) 
+
+
+r2=
+CALCULATE(
+SUMX(FactDetalles,FactDetalles[Quantity]))

@@ -1,0 +1,95 @@
+##################### FUNCIONES LOGICAS ################################
+
+>=
+<=
+=
+<>
+&&  (y) 
+|| (o)
+##################### FUNCION IF     ################################
+
+// Herramientas de columna
+/// Nueva columna
+
+Lista descuento = 
+IF(FactDetalles[Discount]>0 0.65,"Lista Mayorista","Lista,Minorista")
+
+
+..RELATED  : Estando en una tabla navega en otras tablas es como un buscarV
+
+Tipo de vendedor =
+IF(RELATED(DimVendedor[IdVendedor])=1,"	Vendedor Local","Vendedor Extranjero")
+
+
+Mercado =
+IF(FactDetalles[Quantity=14 || RELATED(DimVendedor[IdVendedor])=3,"Extranjero","Nacional")
+
+
+
+Tipo de Mercado2 =
+IF(RELATED(DimProducto[Sub-Category])IN {"Paper","Art"},"Nacional,"Extranjero")
+
+
+
+Tipo de Mercado2 =
+VAR lista={"30","Paper","Art"}
+
+VAR operacion =
+	IF(RELATED(DimProducto[Sub-Category])IN lista  ,"Nacional,"Extranjero")
+RETURN  operacion 
+
+
+Producto proximo a vencer =
+ IF(FactDetalles[Quantity]<=2 && FactDetalles[Discount]>0.75,"Si","No")
+
+
+Tipo de Mercado 2 
+IF(Factalles[Quantity]=14 || RELATED(DimVendedor[IdVendedor])=3,"Mercado internacional","Mercado nacional")
+
+
+/// IF ANIDADOS 
+
+Tipo de cliente = 
+IF (Factalles[Quantity]<5,"Cliente en ascenso",
+	IF (Factalles[Quantity]<10,"Cliente regular",
+	IF (Factalles[Quantity]<13 || FactDetalles[Discount]>0.75,"Cliente premium","Cliente diamante")))
+
+// dimclientes
+		
+//Nueva columna 
+
+Total facturado =SUMX(FactDetalles,
+			FactDetalles[Sales]*FactDetalles[Quantify])
+
+Clasificacion consumo =IF([Total facturado]>1600,"Consumo alto","Consumo bajo")
+
+#####################   FUNCION SWITCH ##################################
+// SWITCH parecido al if 
+
+
+Categoria de transaccion =
+SWITCH (TRUE(),
+	FactDetalles[Quantity]>10,"Mayorista","Minorista") 
+
+Categoria de trasaccion 2=
+SWITCH (False(),
+	FactDetalles[Quantity]>10,"Minorista","Mayorista") 
+
+Tipo de Cliente switch=
+SWITCH (TRUE(),
+	FactDetalles[Quantity]<5,"Cliente en ascenso",
+	FactDetalles[Quantity]<10,"Cliente regular",
+	Factalles[Quantity]<13 || FactDetalles[Discount]>0.75,"Cliente premium",
+	"Cliente diamante")
+
+Producto entregado = 
+SWITCH(RELATED(FactTransacciones[Returned]),
+	"Not","Entregado",
+ 	"Yes","Devolucion",
+	"Revisar")
+
+	
+
+	
+
+

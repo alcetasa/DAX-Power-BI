@@ -1,0 +1,220 @@
+####### CALCULATE ####### 
+
+--ACCEDER O AGREGACION SEGUN LA CONDICIONAL DE UNA TABLA  
+
+//Medidas 
+
+
+Total ganancias =
+CALCULATE(
+SUMX(FactDetalles,
+    FactDetalles[Profit]*FactDetalles[Quantity])*(1-FactDetalles[Discount])),
+    FactTransacciones[Returned]="Not")
+
+
+Total Costos = 
+	CALCULATE(
+	SUMX(FactDetalles,
+	     (FactDetalles[Sales]*FactDetalles[Profit])*
+	     (FactDetalles[Quantity]*FactDetalles[Discount])),
+	      FactTransacciones[Returned]="Not")
+
+
+Total ganancias hombe office=
+ 	CALCULATE([Total gancias],
+		 DimSegmento[Segment]="Home office")
+
+Ganancias >10 unidades =
+ 	CALCULATE([Total gancias],
+		 FactDetalles[Quantity]>10)
+
+Total ganancias 2014 = 
+CALCULATE (
+	[Total ganacias],
+	YEAR(FactTransacciones[Order Date]=2014)
+
+---- CALCULATE (OPERACION,CONDICION DE FILTRO) 
+
+1 Total descuentos ejecutados=
+CALCULATE(
+	SUMX(FactDetalles,
+	     FactDetalles[Sales]*FactDetalles[Quantity]*FactDetalles[Discount]),
+
+
+	    FactDetalles[Discount]>0,FactTransacciones[Returned]="Not")
+
+
+
+---- SUMX (TABLA,OPERACION )  no es optima por que es iterativa desde el comiezo
+2 Total descuentos ejecutados =
+SUMX(
+	FILTER(FactDetalles,FactDetalles[Discount]>0 && RELATED(FactTransacciones[Returned])="Not"),
+	       FactDetalles[Sales] * FactDetalles[Quantify]*FactDetalles[Discount] )
+)
+
+
+----CALCULATE (OPERACION,CONTEXTO DE FILTRO) ---el calculo se concentra en el filtro
+
+3 Total descuentos ejecutados=
+var tabla = FILTER(FactDetalles,FactDetalles[Discount]>0 && RELATED(FactTransacciones[Returned])="Not")
+var operacion =CALCULATE(
+	       SUMX(FactDetalles,
+	       FactDetalles[Sales] * FactDetalles[Quantify]*FactDetalles[Discount],
+		tabla)
+RETURN operacion 
+
+
+
+####### KEEPFILTERS ####### 
+
+--- Respeta el contexto de filtro
+
+Total ganacias home office (Correcto) = 
+CALCULATE([Total ganancias],
+   KEEPFILTERS(DimSegmento[Segment]="Home office))
+
+
+
+####### ALL ####### 
+--- No si inmuta con los filtros 
+
+
+all Tabla - Total ganancias = 
+CALCULATE([Total ganancias],
+   all(FactDetalles)
+
+
+
+all Tabla - Total ganancias = 
+CALCULATE([Total ganancias],
+   all(DimSegmento[Segment])
+
+
+####### ALL  SELECTED ####### 
+
+ALLSELECTED: Mantiene el contexto de filtro aplicado a una tabla o columna específica, permitiendo que los filtros externos aún afecten el cálculo. Útil para cálculos como participaciones o proporciones.
+
+Usa ALLSELECTED cuando necesites preservar filtros externos y calcular sobre los valores visibles.
+
+---- Reacciona al filtro pero especificamente a la que se aplico el allselected
+all selected - total ganacias =
+CALCULATED([Total ganancias],ALLSELECTED(DimSegmento[Segment]))
+
+
+Participacion ganancias por segmentos =
+var todoslossegmentos=
+CALCULATED([Total ganancias],ALLSELECTED(DimSegmento[Segment]))
+
+var operacion=DIVIDE([Total ganancias],todoslosegmentos,0)
+
+return todoslossegmentos
+
+
+
+
+####### ALL  EXCEPT ####### 
+ALLEXCEPT: Elimina todos los filtros en la tabla excepto los especificados, asegurando que solo las columnas indicadas retengan los filtros.
+
+Usa ALLEXCEPT cuando quieras ignorar todos los filtros excepto los de una columna específica.
+
+allexcep total ganancias por categoria=
+	CALCULATE([Total ganancias],ALLEXCEPT(DimProducto[Category]))
+
+
+
+####### HASONEVALUE,HASONEFITER,ISFILTERED ####### 
+
+### HASONEVALUE###
+---- Me indica si solo hay un valor en el segmento
+Has one value =
+HASONEVALUE(DimProducto[Sub-Category])
+
+--------
+Participacion ganancias categoria unica=
+IF(HASONEVALUE(DimProducto[Category]),
+
+var totalgananciassubcategorias=CALCULATE([Total ganancias],REMOVEFILTERS(DimProducto[Sub-Category]))
+var operacion = DIVIDE([Total ganancias],totalgananciassubcategorias,0)
+
+RETURN operacion ,"Error seleccione una subcategoria")
+
+###  HASONEFITER  ###  Muestra si existe un filtro de categoria o es el valor general
+has one filter = HASONEFILTER(DimProducto[Sub-Category])
+
+###  ISFILTERED ###  
+-------- Si esta filtrado a cierto nivel 
+Is filtered =
+ISFILTERED(DimProducto[Sub-Category])
+
+
+Participacion ganancias por categoria=
+var todoslossegmentos=
+CALCULATED([Total ganancias],ALLSELECTED(DimSegmento[Category]))
+
+var operacion=DIVIDE([Total ganancias],todoslosegmentos,0)
+
+return todoslossegmentos
+
+
+% Participacion por sub categoria 
+
+Participacion ganancias por sub-categoria=
+var todoslossegmentos=
+CALCULATED([Total ganancias],ALLSELECTED(DimProducto[Sub-Category]))
+
+var operacion=DIVIDE([Total ganancias],todoslosegmentos,0)
+
+return todoslossegmentos
+
+
+
+### ISINSCOPE ###  Devuelve un valor True si la columna especificada es el nivel de una jerarquia de niveles
+Iniscoope =
+ISINSCOPE(DimSegmento[Segmento]) // ISINSCOPE(DimProducto[Sub-Category])
+
+Participacion en ganancias=
+SWITCH (TRUE(),
+ISINSCOPE(DimSegmento[Segment]),[Participacion ganancias por segmento],
+ISINSCOPE(DimProducto[Sub-Category]),[Participacion ganancias por sub-categoria],
+ISINSCOPE(DimProducto[Category]),[Participacion ganancias por categoria],
+BLANCK())
+
+
+### SELECTEDVALUE ### 
+SELECTEDVALUE es útil para obtener un valor único seleccionado y manejar situaciones donde hay múltiples selecciones o ninguna. Se usa en medidas, títulos dinámicos y cálculos condicionales
+
+Medida Tipo de Mercado=
+IF(SELECTEDVALUE(DimProducto[Sub-Category])="Art",
+	"Mercado internacional","Mercado nacional")
+
+
+Texto= "Informe de ventas de :" & SELECTEDVALUES(DimProducto[Sub-Category])
+
+
+### TREATAS ###  Relacion virtual 
+
+//Nueva tabla
+
+Donativos=
+	DATATABLE("Año",INTEGER,
+		  "Ingresos por donativos",CURRENCY,
+	          "Descripcion",STRING,
+		{
+			{2017,15000,"Semestre 1 2017"},
+			{2017,14000,"Semestre 2 2017"},
+			{2016,14000,"Semestre 1 2016"},
+			{2016,12000,"Semestre 2 2016"},
+			{2015,11000,"Semestre 1 2015"},
+			{2015,10000,"Semestre 2 2015"},
+			}
+		
+Ingresos por donativos = 
+CALCULATE(
+SUM (Donativos[Ingresos por donativos]),
+TREATAS(VALUES(DimCalentadio[Año],Donativos[Año]))
+
+
+	
+
+
+

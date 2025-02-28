@@ -1,0 +1,171 @@
+########## DISTINCT ########## 
+//Herramientas de Tabla
+//Nueva tabla
+
+Producto unicos vendidos=
+  DISTINCT (FactDetalles[Product ID]) 
+
+MEDIDA Producto unicos vendidos=
+ COUNTROWS(DISTINCT (FactDetalles[Product ID]))
+
+VALIDACION UNICOS=
+DISTINCTCOUNT(FactDetalles[Product ID]))
+
+########## VALUES ########## 
+---VALUES ES SIMILAR AL DISTINCT 
+
+//Herramientas de Tabla
+
+Compradores unicos=
+VALUES(FactTransacciones[Customer ID]))
+
+Compradores unicos=
+COUNTROWS(
+VALUS(FactTransacciones[Customer ID])))
+
+
+########## FILTER ########## 
+
+Tabla transacciones mayoristas =
+FILTER(FactDetalles,FactDetalles[Quantity]=14)
+
+//Herramientas de Tabla
+//Nueva tabla
+Tabla transacciones tecnologias =
+FILTER(FactDetalles,RELATED(DimProducto[Category])="Technology")
+
+/// Desactivar Tablas 
+
+//Herramientas de Tabla
+//Nueva tabla
+
+Tabla transacciones con descuentos efectivos=
+FILTER(FactDetalles,FactDetalles[Discount]>0 &&
+	RELATED(FactTransacciones[Returned])="Not")
+
+
+Transacciones ultimo dia de venta=
+var ultimodiadeventa=MAX(FactTransacciones[OrderDate]])
+var tabla=FILTER(FactTransacciones,FactTransacciones[Order Date]= ultimodiadeventa)
+RETURN tabla
+
+
+
+########## SUMMARIZE ########## 
+-- Es como un group by 
+
+Tabla categoria unicas=
+SUMMARIZE(DimProducto,DimProducto[Category])
+
+Tabla Clientes unicos=
+SUMMARIZE(FactTransacciones,FactTransacciones[CustomerID])
+
+---
+Medida Total de ventas =
+ SUMX(FactDetalles,FactDetalles[Sales]* FactDetalles[Quantity])
+
+Total de ventas por cliente=
+SUMMARIZE(FactTransacciones,FactTransacciones[CustomerID],
+	"Totaldeventas",[Medida Total de Ventas])
+
+Total de ventas por cliente2 
+SUMMARIZE(FactTransacciones,FactTransacciones[CustomerID],
+	"Totaldeventas", SUMX(FactDetalles,FactDetalles[Sales]* FactDetalles[Quantity]) )
+
+
+Total de ventas y transacciones por  categoria  y segmento =
+
+SUMMARIZE(FactDetalles,DimSegmento[Segment],DimProducto[Category],
+ 	"Total de ventas", [Medida Total de Ventas],
+	"Trasacciones",[Cantidad de transacciones])
+
+
+Tabla cliente>10 Transacciones=
+VAR tablaclientes =
+SUMMARIZE(FactTransacciones,FactTransacciones[CustomerID]),
+	"Cantidad de transacciones,[Cantidad de transacciones])
+
+VAR filtro = FILTER (tabla clientes,[Cantidad de transacciones>10)
+VAR resultado=COUNTROWS(filtro)
+VAR fila=ROW("Resultado",resultado)
+RETURN resultado
+
+
+########## CALCULATE ########## 
+
+---CALCULETABLE  Parecido al filter
+
+Tabla producto tecnologia =
+CALCULATETALBE(FactDetalles,DimProducto[Category]="Technology")
+
+Productos unicos vendidos en el unico dia=
+var ultimodia=MAXFactTransaccion[Order Date]
+
+var tablaproductosunicos=
+	CALCULATETABLE(VALUES(FactDetalles[Product ID]),
+	FactTransacciones[Order Date]=ultimodia)
+RETURN tablaproductosunicos
+
+
+############ ADD COLUMNS ####################
+
+Tabla Dias Transcurridos por transaccion=
+ADDCOLUMNS(FactTransacciones,
+	"Diferencias de dias",DATEDIFF(FactTransacciones[Order Date],FactTransacciones[Ship Date],day)) 
+
+Tabla Dias Transcurridos por transaccion 2 =
+
+ADDCOLUMNS(
+CALCULATABLE(VALUES(FactTransacciones[Order ID])),
+"Dias para entrega",DATEDIFF(
+		CALCULATE(MAX(FactTransacciones[Order Date])),
+		CALCULATE(MAX(FactTransacciones[Ship Date])),DAY
+))	
+
+
+
+
+############ SELECTCOLUMNS ####################
+--- Muy parecido a Summarise
+Tabla ganancias por producto= 
+SELECTCOLUMNS(DimProducto,
+	      "Categoria de producto",DimProducto[Category],
+	      "Nombre de producto",DimProducto[Product Name],
+	      "Total de ventas",[Medida Total de ventas]
+)
+
+Tabla detalle de transaccion por segmento y vendedor =
+SELEECTCOLUMNS(
+    FactTransacciones,
+	"Codigo Transaccion",FactTransacciones[Order ID],
+	"Segmento de producto",RELATED(DimSegmento[Segment])
+	"Nombre de vendedor",RELATED(DimVendedor[Retail Sales People])
+	"Total de Ventas",[Medida Total de ventas],
+	"Productos unicos",[Productos unicos vendidos]
+	
+
+############ COMBINACIONES DE FUNCIONES DE TIPO DE TABLA ####################
+
+Tabla total de ventas transacciones tecnologia=
+SUMMARIZE(
+	FILTER(FactDetalles,RELATED(DimProducto[Category])="Technology"),
+	DimClientes[Customer Name],
+	"Total de ventas",[Medida Total de ventas])
+
+
+Historico total de ventas por pructos vendidos en el ultimo dia=
+VAR ultimodia=MAX(FactTransacciones[Order Date])
+VAR tablasproductosunicos=
+	CALCULATETABLE(
+			VALUES(FactDetalles[Product ID]),FactTransacciones[Order Date]= ultimo dia
+	
+var transacciones= FILTER(FactDetalles,FactDetalles[Product ID] IN tablaproductosunicos)
+
+var total=
+	ROW("Total de ventas",SUMX(transacciones,[Medida Total de ventas]))
+
+RETURN total
+
+ 
+
+

@@ -1,0 +1,89 @@
+##################### TABLA CALENDARIO #####################################
+//Herramientas de tabla
+/// Nueva Tabla 
+
+
+DimCalendario_no usar =
+   CALENDARAUTO() 
+
+
+DimCalendario=
+   CALENDAR(MIN(FactTransaciiones[Order Date],	
+	    MAX(FactTransaciiones[Order Date]
+)
+
+
+DimCalendario=
+   CALENDAR(MIN(FactTransaciiones[Order Date],	
+	    TODAY()
+)
+// Marcar como tabla de fechas
+#######
+/// Nueva Tabla 
+
+DimCalendario=
+   CALENDAR(MIN(FactTransaciiones[Order Date],	
+	    MAX(FactTransaciiones[Order Date]
+)
+Dia=DAY(DimCalendario[Date])
+Mes=MONTH(DimCalendario[Date])
+Año=YEAR(DimCalendario[Date])
+Dia de la semana= WEEKDAY(DimCalendario[Date])
+Numero de semana=WEEKNUM(DimCalendario[Date])
+Mes texto= FORMAT ((DimCalendario[Date], "mmmm")
+Dia texto corto=FORMAT ((DimCalendario[Date], "DD")
+Dia texto largo=FORMAT ((DimCalendario[Date], "DDDD")
+Fin de Semana =IF(DimCalendario[Date]<6,"No","Si")
+Periodo=
+var anio =FORMAT(DimCalendario[Date],"yyy")
+var mes=FORMAT(DimCalendario[Date],"mmmm")
+var aniomes= anio & "-" &  mes 
+RETURN aniones
+
+Dia festivo=
+
+SWITCH(TRUE(),
+MONTH(DimCalendarioDate])=12 && DAY(DimCalendarioDate])=25,"Navidad","Dia Laboral",
+MONTH(DimCalendarioDate])=1 && DAY(DimCalendarioDate])=1,"Año Nuevo","Dia Laboral" )
+
+
+
+
+
+CREAR CALENDARIO
+Calendario = 
+    VAR fechaInicial=MIN(Tb_hechos[Fecha de la  Aplicación de la Encuesta])
+    VAR fechaFinal = MAX(Tb_hechos[Fecha de la  Aplicación de la Encuesta])
+RETURN
+        ADDCOLUMNS(CALENDAR(fechaInicial,fechaFinal),
+        "Year",YEAR([Date]),
+        "Month",MONTH([Date]),
+        "NombreMes", FORMAT ([Date], "mmmm"),
+        "Día",DAY([Date]),
+        "NumSemana", "S"&WEEKNUM([Date]),
+        "NomDía", FORMAT([Date], "dddd"),
+        "Periodo", format([Date], "mmn")&FORMAT([Date], "-yy"))
+
+
+
+
+DimCalendar = 
+ADDCOLUMNS (
+CALENDAR(MIN(FactTransacciones[Order Date]), MAX(FactTransacciones[Order Date])) ,
+"FechaSK", FORMAT ( [Date], "YYYYMMDD" ),
+"#Año", YEAR ( [Date] ),
+"#Trimestre", QUARTER ( [Date] ),
+"#Mes", MONTH ( [Date] ),
+"#Día", DAY ( [Date] ),
+"Trimestre", "T" & FORMAT ( [Date], "Q" ), 
+"Mes", FORMAT ( [Date], "MMMM" ),
+"MesCorto", FORMAT ( [Date], "MMM" ),
+"#DíaSemana", WEEKDAY ( [Date],2 ),
+"#SemanaAño", WEEKNUM ( [Date],2 ),
+"CierreSemana", ( [Date] + 7 - WEEKDAY( [Date],2 ) ),
+"Día", FORMAT ( [Date], "DDDD" ),
+"DíaCorto", FORMAT ( [Date], "DDD" ),
+"AñoTrimestre", FORMAT ( [Date], "YYYY" ) & "/T" & FORMAT ( [Date], "Q" ),
+"Año#Mes", FORMAT ( [Date], "YYYY/MM" ),
+"AñoMesCorto", FORMAT ( [Date], "YYYY/mmm" ) ) 
+	
