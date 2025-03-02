@@ -1,0 +1,115 @@
+#### RELATED  ####
+
+#### CROSSFILTER  ####
+CROSSFILTER cambia la forma en que se filtran dos tablas relacionadas en un modelo de datos.
+
+**Sintaxis:**
+```DAX
+CROSSFILTER(tabla1[columna], tabla2[columna], dirección)
+```
+
+**Ejemplo:**
+```DAX
+Total transacciones =
+CALCULATE(
+    COUNTROWS(FactTransacciones),
+    CROSSFILTER(
+        FactTransacciones[Order ID],
+        FactDetalles[Order ID],
+        Both
+    )
+)
+```
+
+#### USERRELATIONSHIP  ####
+USERRELATIONSHIP se usa para activar una relación específica entre dos tablas cuando hay más de una relación entre ellas.
+
+**Ejemplo:**
+```DAX
+Transacciones entregadas =
+CALCULATE(
+    COUNTROWS(FactTransacciones),
+    USERELATIONSHIP(FactTransacciones[Ship Date], DimCalendario[Date])
+)
+```
+
+#### TREATAS - Relación Virtual ####  
+TREATAS transfiere valores de una tabla o columna a otra, como si fueran filtros, sin necesidad de relaciones en el modelo.
+
+**Ejemplo:**
+```DAX
+// Crear una nueva tabla
+Donativos =
+    DATATABLE(
+        "Año", INTEGER,
+        "Ingresos por donativos", CURRENCY,
+        "Descripcion", STRING,
+        {
+            {2017, 15000, "Semestre 1 2017"},
+            {2017, 14000, "Semestre 2 2017"},
+            {2016, 14000, "Semestre 1 2016"},
+            {2016, 12000, "Semestre 2 2016"},
+            {2015, 11000, "Semestre 1 2015"},
+            {2015, 10000, "Semestre 2 2015"}
+        }
+    )
+
+Ingresos por donativos =
+CALCULATE(
+    SUM(Donativos[Ingresos por donativos]),
+    TREATAS(VALUES(DimCalendario[Año]), Donativos[Año])
+)
+```
+
+#### INTERSECT  ####
+INTERSECT devuelve los valores comunes entre dos conjuntos de datos.
+
+**Ejemplo:**
+```DAX
+Total de ventas productos exclusivos 2014 =
+VAR productos2014 =
+    CALCULATETABLE(
+        VALUES(FactDetalles[Product ID]),
+        YEAR(DimCalendario[Date]) = 2014
+    )
+
+VAR todoslosproductos = VALUES(FactDetalles[Product ID])
+VAR join_ = INTERSECT(todoslosproductos, productos2014)
+VAR operacion = CALCULATE([Medida Total de ventas], join_)
+
+RETURN operacion
+```
+
+#### EXCEPT  ####
+EXCEPT devuelve los valores que están en una tabla pero no en otra, como una resta de conjuntos.
+
+**Ejemplo:**
+```DAX
+Total de ventas productos exclusivos 2017 =
+VAR productoshistoricos =
+    CALCULATETABLE(
+        VALUES(FactDetalles[Product ID]),
+        YEAR(DimCalendario[Date]) IN {2014, 2015, 2016}
+    )
+
+VAR todoslosproductos = VALUES(FactDetalles[Product ID])
+VAR productoexclusivos = EXCEPT(todoslosproductos, productoshistoricos)
+VAR operacion = CALCULATE([Medida Total de ventas], productoexclusivos)
+
+RETURN operacion
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
